@@ -1,0 +1,40 @@
+/*
+ * Device tree overlay to re-enable hardware CS for SPI0
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2835", "brcm,bcm2836", "brcm,bcm2708", "brcm,bcm2709";
+
+	fragment@0 {
+		target = <&spi0>;
+		frag0: __overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+			cs-gpios = <&gpio 8 1>, <&gpio 7 1>, <&gpio 16 1>;
+
+			spidev@2{
+				compatible = "spidev";
+				reg = <2>;	/* CE2 */
+				#address-cells = <1>;
+				#size-cells = <0>;
+				spi-max-frequency = <500000>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&spi0_cs_pins>;
+		frag1: __overlay__ {
+			brcm,pins = <8 7 16>;
+			brcm,function = <1>; /* output */
+		};
+	};
+
+	__overrides__ {
+		cs2_pin = <&frag0>,"cs-gpios:28", <&frag1>,"brcm,pins:8";
+	};
+};
